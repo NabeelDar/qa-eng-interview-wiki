@@ -24,6 +24,9 @@ Each test file contains more detailed instructions.
 Make sure that the only files that you edit are `login.test.ts`, `searchWikipedia.ts`, and `wikipediaHomepageActions.ts`.
 
 ## Loom Link
+
+Please contact me if you would like access to the credentials for the account used to test over email.
+
 Here is the link where I go over the code and execution in brief detail:
 
 https://www.loom.com/share/8b3c53df647745baab6be9f5850d3eed?sid=30afbab0-bf93-46fa-920f-7ce5727e7125
