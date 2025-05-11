@@ -1,0 +1,23 @@
+{
+  "name": "qa-eng-interview-wiki",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NabeelDar/qa-eng-interview-wiki.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NabeelDar/qa-eng-interview-wiki/issues"
+  },
+  "homepage": "https://github.com/NabeelDar/qa-eng-interview-wiki#readme",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^22.15.17"
+  }
+}

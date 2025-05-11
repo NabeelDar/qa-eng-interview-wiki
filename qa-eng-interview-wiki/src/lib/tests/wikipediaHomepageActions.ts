@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 
 /**
  * This test was generated using Ranger's test recording tool. The test is supposed to:
@@ -12,23 +12,70 @@ import { Page, expect } from '@playwright/test';
  *
  * Good luck!
  */
+
+
 export async function run(page: Page, params: {}) {
-    /** STEP: Navigate to URL */
-    await page.goto('https://en.wikipedia.org/wiki/Main_Page');
+  /** STEP 1: Navigate */
+  await page.goto('https://en.wikipedia.org/wiki/Main_Page');
 
-    /** STEP: Click the link to view the total number of articles in English */
-    const totalArticlesLink = page.getByRole('link', { name: '6,970,005' });
-    await totalArticlesLink.click();
+  /** STEP 2: Article count */
+  const englishCountLink = page
+    .locator('#articlecount ul li')
+    .nth(1)
+    .locator('a')
+    .first();
+  await expect(englishCountLink).toBeVisible({ timeout: 10_000 });
+  const rawCountText = (await englishCountLink.textContent())!.trim();
+  const articlesNum = parseInt(rawCountText.replace(/,/g, ''), 10);
+  expect(
+    articlesNum,
+    `Expected fewer than 7,000,000 English articles, but found ${articlesNum}`
+  ).toBeLessThan(7_000_000);
+  console.log(`✔️ English articles: ${articlesNum}`);
 
-    /** STEP: Select the 'Small' text size option in the appearance settings */
-    const smallTextSizeOption = page.getByRole('radio', { name: 'Small' });
-    await smallTextSizeOption.click();
+  /** STEPS 3–5: Font‐size toggles */
 
-    /** STEP: Click the 'Large' text size option to change the display size */
-    const largeTextSizeOption = page.getByRole('radio', { name: 'Large' });
-    await largeTextSizeOption.click();
+  // pick the heading
+  const target = page.locator('#Welcome_to_Wikipedia');
 
-    /** STEP: Click the 'Standard' text size option in the appearance settings */
-    const standardTextSizeButton = page.getByLabel('Standard').first();
-    await standardTextSizeButton.click();
+  // helper to read computed font-size
+  const getFontSize = async () =>
+    parseFloat(await target.evaluate(el => getComputedStyle(el).fontSize));
+
+  const initialSize = await getFontSize();
+  console.log(`Initial heading font-size: ${initialSize}px`);
+
+  // *** RE-INTRODUCED FONT SIZE MENU LOCATOR ***
+  const fontSizeMenu = page.locator(
+    '#skin-client-prefs-vector-feature-custom-font-size'
+  );
+  await expect(fontSizeMenu, 'Font‐size menu must be present').toBeVisible();
+
+  // click a radio, wait, then assert relative to initialSize
+  async function checkSize(
+    value: '0' | '1' | '2',
+    label: 'Small' | 'Standard' | 'Large',
+    comparator: 'lt' | 'gt' | 'eq'
+  ) {
+    const radio = fontSizeMenu.locator(`input[value="${value}"]`);
+    await expect(radio, `Radio for "${label}" should exist`).toHaveCount(1);
+    await radio.click();
+    await page.waitForTimeout(500);
+
+    const newSize = await getFontSize();
+    console.log(`${label} heading font-size: ${newSize}px`);
+
+    if (comparator === 'lt') {
+      expect(newSize, `${label} should be smaller`).toBeLessThan(initialSize);
+    } else if (comparator === 'gt') {
+      expect(newSize, `${label} should be larger`).toBeGreaterThan(initialSize);
+    } else {
+      expect(newSize, `${label} should return to initial`).toBeCloseTo(initialSize, 0.1);
+    }
+  }
+
+  // now run the three checks
+  await checkSize('0', 'Small', 'lt');
+  await checkSize('2', 'Large', 'gt');
+  await checkSize('1', 'Standard', 'eq');
 }
